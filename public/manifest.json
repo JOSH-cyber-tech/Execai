@@ -1,0 +1,10 @@
+{
+  "name": "ExecAI",
+  "short_name": "ExecAI",
+  "description": "AI-powered execution assistant for planning, tracking, and completing work before deadlines slip.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f9fafb",
+  "theme_color": "#4f46e5",
+  "icons": []
+}
