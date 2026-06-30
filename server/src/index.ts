@@ -31,7 +31,7 @@ app.use(rateLimit({ windowMs: 15 * 60 * 1000, limit: 300 }));
 app.use(express.json());
 
 // Health check endpoint
-app.get('/health', (_req, res) => {
+const healthHandler = (_req: express.Request, res: express.Response) => {
   res.json({
     status: 'ok',
     timestamp: new Date().toISOString(),
@@ -42,7 +42,10 @@ app.get('/health', (_req, res) => {
       gemini: Boolean(process.env.GEMINI_API_KEY),
     },
   });
-});
+};
+
+app.get('/health', healthHandler);
+app.get('/api/health', healthHandler);
 
 app.use(clerkMiddleware({
   publishableKey: process.env.CLERK_PUBLISHABLE_KEY || process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY,

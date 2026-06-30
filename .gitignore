@@ -19,6 +19,8 @@
 # Build
 /build
 /dist
+/server/dist
+/release
 
 # Environment variables
 .env
