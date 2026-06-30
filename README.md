@@ -1,23 +1,166 @@
-# ExecAI
+# 🚀 ExecAI
 
-AI-powered desktop execution assistant for planning, prioritizing, scheduling, tracking, and completing work before deadlines slip.
+> **Your AI-Powered Desktop Execution Companion**
+>
+> Plan smarter. Prioritize intelligently. Execute consistently.
 
-## Implemented
+ExecAI is an AI-powered desktop productivity companion designed to help students, professionals, and entrepreneurs **plan, prioritize, schedule, and complete work before deadlines are missed.**
 
-- Electron desktop shell (`main.js`) that launches the Next.js frontend and Express backend.
-- Next.js 14 dashboard with Today, Goals, Tasks, Schedule, Check-in, Habits, and Analytics pages.
-- Clerk-protected frontend routes and backend API routes.
-- Express + TypeScript backend with Tasks, Goals, Check-in, Schedule, Habits, Analytics, Notifications, and Calendar status APIs.
-- Gemini-backed AI service with local fallbacks when `GEMINI_API_KEY` is absent.
-- Prisma schema for users, tasks, subtasks, goals, milestones, schedule blocks, habits, check-ins, productivity logs, AI insights, and notifications.
-- Background risk detection and evening check-in jobs.
-- PWA manifest and push-notification service worker foundation.
+Unlike traditional productivity apps that rely on passive reminders, ExecAI stays with you as a **desktop companion**, proactively helping you stay focused—even when the main application is closed.
 
-## Required Environment
+---
 
-Root `.env.local`:
+## ✨ Why ExecAI?
 
-```bash
+Most productivity tools wait for you to open them.
+
+**ExecAI comes to you.**
+
+Its always-on desktop companion acts like your personal AI secretary, continuously helping you manage your day without interrupting your workflow.
+
+Whether you're preparing for exams, building a startup, managing projects, or simply organizing your daily tasks, ExecAI transforms goals into actionable execution plans.
+
+---
+
+# 🖥️ MVP – AI Desktop Companion
+
+The Desktop Companion is the core innovation of ExecAI.
+
+Even after closing the dashboard, the companion remains available on your desktop, allowing you to:
+
+- 📌 Add tasks instantly
+- 🔔 Receive smart reminders
+- 📅 View today's schedule
+- ⚡ Get proactive deadline alerts
+- 🤖 Chat with your AI assistant
+- 🎯 Stay focused without opening the website
+
+Instead of reminding you after it's too late, ExecAI helps you finish work before deadlines arrive.
+
+---
+
+# 🧠 AI Features
+
+- **AI Goal Planning**
+  - Converts goals into structured roadmaps
+  - Generates milestones and subtasks
+  - Creates execution timelines
+
+- **Intelligent Task Prioritization**
+  - Sorts work by urgency, importance, deadlines, and workload
+
+- **Dynamic AI Scheduling**
+  - Builds personalized schedules
+  - Automatically regenerates plans when availability changes
+
+- **Context-Aware Reminders**
+  - Smart notifications based on urgency and user activity
+
+- **Deadline Risk Prediction**
+  - Detects high-risk tasks before deadlines are missed
+
+- **Daily Check-ins**
+  - Tracks completed work
+  - Suggests improvements
+  - Updates future schedules automatically
+
+- **Goal & Habit Tracking**
+  - Monitor productivity streaks
+  - Track long-term progress
+
+- **AI Insights**
+  - Personalized productivity recommendations
+  - Daily execution analysis
+
+---
+
+# 📅 Calendar Integration
+
+ExecAI automatically syncs:
+
+- Deadlines
+- Meetings
+- Milestones
+- Scheduled work sessions
+- Daily plans
+
+---
+
+# 🛠 Tech Stack
+
+### Frontend
+
+- Next.js 14
+- React
+- Tailwind CSS
+- TypeScript
+- Clerk Authentication
+
+### Backend
+
+- Node.js
+- Express
+- Prisma ORM
+- PostgreSQL (Supabase)
+
+### AI
+
+- Google Gemini API
+- Local AI fallbacks
+
+### Desktop
+
+- Electron
+
+---
+
+# 📂 Project Structure
+
+```
+ExecAI/
+│
+├── app/                 # Next.js App Router
+├── components/          # UI Components
+├── electron/            # Electron Desktop Companion
+├── prisma/              # Database Schema
+├── public/
+├── server/
+│   ├── routes/
+│   ├── controllers/
+│   ├── services/
+│   ├── jobs/
+│   └── middleware/
+│
+└── main.js              # Electron Entry
+```
+
+---
+
+# ✅ Implemented Features
+
+- Electron Desktop Companion
+- Next.js Dashboard
+- Clerk Authentication
+- Express + TypeScript Backend
+- Prisma Database
+- Gemini AI Integration
+- Goal Management
+- Task Management
+- AI Scheduling
+- Daily Check-ins
+- Habit Tracking
+- Analytics Dashboard
+- Background Jobs
+- Push Notification Foundation
+- Calendar Integration APIs
+
+---
+
+# 🔑 Required Environment Variables
+
+### Root `.env.local`
+
+```env
 NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=...
 CLERK_SECRET_KEY=...
 NEXT_PUBLIC_CLERK_SIGN_IN_URL=/sign-in
@@ -25,10 +168,10 @@ NEXT_PUBLIC_CLERK_SIGN_UP_URL=/sign-up
 NEXT_PUBLIC_API_URL=http://localhost:3001
 ```
 
-Backend `server/.env`:
+### `server/.env`
 
-```bash
-DATABASE_URL=postgresql://postgres.<project-ref>:<db-password>@aws-0-<region>.pooler.supabase.com:6543/postgres
+```env
+DATABASE_URL=postgresql://...
 CLERK_SECRET_KEY=...
 CLERK_PUBLISHABLE_KEY=...
 NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=...
@@ -38,37 +181,98 @@ NODE_ENV=development
 NEXT_PUBLIC_APP_URL=http://localhost:3000
 ```
 
-Use the Supabase Database connection string, not the dashboard URL. For Supabase pooler mode, use the transaction pooler URI on port `6543`.
+> **Note:** Use the **Supabase PostgreSQL Transaction Pooler URI (port 6543)**, not the dashboard URL.
 
-## Run
+---
+
+# 🚀 Getting Started
+
+Install dependencies:
 
 ```bash
 npm install
-cd server && npm install
+
+cd server
+npm install
 cd ..
+```
+
+Generate Prisma client:
+
+```bash
 npx prisma generate --schema=prisma/schema.prisma
+```
+
+Build the project:
+
+```bash
 npm run build
-cd server && npm run build
+
+cd server
+npm run build
 cd ..
+```
+
+Launch ExecAI:
+
+```bash
 npm run execai
 ```
 
-`npm run execai` automatically picks free frontend/backend ports if `3000` or `3001` are already occupied, then passes the chosen frontend URL into Electron.
+The launcher automatically finds free frontend and backend ports if `3000` or `3001` are already in use.
 
-Backend health check:
+---
+
+# ❤️ Health Check
 
 ```bash
-curl -s http://localhost:3001/health
+curl http://localhost:3001/health
 ```
 
-## Verification Status
+Expected response:
 
-- `npx prisma generate --schema=prisma/schema.prisma` passes.
-- `npm run build` passes for the frontend.
-- `cd server && npm run build` passes for the backend.
-- Backend starts and `/health` returns OK.
+```
+OK
+```
 
-Current blocker for authenticated data routes: the configured Supabase `DATABASE_URL` is rejected by Supabase with `tenant/user postgres.ngvwgacqzxnlbocdngwl not found`. Replace it with the correct transaction-pooler PostgreSQL URI from Supabase Project Settings.
-# Execai
-# Execai
-# Execai
+---
+
+# 📌 Current Status
+
+✅ Frontend Build
+
+✅ Backend Build
+
+✅ Prisma Generation
+
+✅ Electron Integration
+
+✅ AI Services
+
+✅ Authentication
+
+✅ Desktop Companion
+
+⚠️ **Known Issue**
+
+If authenticated routes fail, verify your Supabase `DATABASE_URL`.
+
+Use the **Transaction Pooler PostgreSQL URI** from:
+
+**Supabase → Project Settings → Database → Connection String**
+
+---
+
+# 🎯 Vision
+
+We believe productivity shouldn't depend on remembering to open another app.
+
+ExecAI is building the future of intelligent productivity—where an AI companion stays by your side, understands your priorities, adapts to your schedule, and helps you execute your goals before deadlines slip.
+
+---
+
+# 👥 Team
+
+Built with ❤️ for modern productivity.
+
+**ExecAI — Plan Smarter. Execute Better.**
