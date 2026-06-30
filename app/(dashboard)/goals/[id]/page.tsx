@@ -20,7 +20,7 @@ type Goal = {
 export default function GoalDetailPage() {
   const params = useParams();
   const { data: goals = [] } = useGoals() as { data?: Goal[] };
-  const goal = goals.find((item) => item.id === params.id);
+  const goal = goals.find((item) => item.id === params?.id);
 
   if (!goal) {
     return <p className="text-sm text-slate-400">Loading goal...</p>;

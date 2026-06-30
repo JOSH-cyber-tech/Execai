@@ -23,21 +23,25 @@ function openDashboard() {
   shell.openExternal(getFrontendUrl('/'));
 }
 
+function getBackendUrl() {
+  return process.env.BACKEND_URL || `http://localhost:${process.env.BACKEND_PORT || 3001}`;
+}
+
 function requestBackend(pathname, method = 'GET', body = null) {
   return new Promise((resolve, reject) => {
-    const http = require('http');
-    const backendPort = process.env.BACKEND_PORT || 3001;
+    const backendUrl = new URL(pathname, getBackendUrl());
+    const protocol = backendUrl.protocol === 'https:' ? require('https') : require('http');
     const payload = body ? JSON.stringify(body) : null;
-    const req = http.request({
-      hostname: 'localhost',
-      port: backendPort,
-      path: pathname,
+    
+    const options = {
       method,
       headers: {
         ...(payload ? { 'Content-Type': 'application/json', 'Content-Length': Buffer.byteLength(payload) } : {}),
         ...(storedAuthToken ? { Authorization: `Bearer ${storedAuthToken}` } : {}),
       },
-    }, (res) => {
+    };
+
+    const req = protocol.request(backendUrl, options, (res) => {
       let data = '';
       res.on('data', (chunk) => { data += chunk; });
       res.on('end', () => {

@@ -1,0 +1,12 @@
+{
+  "crons": [
+    {
+      "path": "/api/cron/risk-detection",
+      "schedule": "0 8 * * *"
+    },
+    {
+      "path": "/api/cron/evening-checkin",
+      "schedule": "0 19 * * *"
+    }
+  ]
+}

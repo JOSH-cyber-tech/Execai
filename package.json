@@ -11,7 +11,28 @@
     "lint": "next lint",
     "start:server": "cd server && ../node_modules/.bin/prisma generate --schema=../prisma/schema.prisma && npx ts-node src/index.ts",
     "electron": "electron .",
-    "execai": "node scripts/start-execai.mjs"
+    "execai": "node scripts/start-execai.mjs",
+    "package:mac": "electron-builder --mac",
+    "package:win": "electron-builder --win",
+    "postinstall": "cd server && npm install && npm run generate"
+  },
+  "build": {
+    "appId": "com.execai.app",
+    "productName": "ExecAI",
+    "directories": {
+      "output": "release"
+    },
+    "mac": {
+      "target": ["dmg"]
+    },
+    "win": {
+      "target": ["nsis"]
+    },
+    "files": [
+      "main.js",
+      "public/**/*",
+      "package.json"
+    ]
   },
   "dependencies": {
     "@base-ui/react": "^1.6.0",

@@ -60,6 +60,23 @@ app.use('/api/notifications', notificationsRouter);
 app.use('/api/calendar', calendarRouter);
 app.use('/api/assistant', assistantRouter);
 
+// --- Vercel Cron Endpoints ---
+app.get('/api/cron/risk-detection', async (req, res) => {
+  if (req.headers.authorization !== `Bearer ${process.env.CRON_SECRET}`) {
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
+  await runRiskDetectionJob();
+  res.json({ status: 'ok', job: 'risk-detection' });
+});
+
+app.get('/api/cron/evening-checkin', async (req, res) => {
+  if (req.headers.authorization !== `Bearer ${process.env.CRON_SECRET}`) {
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
+  await runEveningCheckInJob();
+  res.json({ status: 'ok', job: 'evening-checkin' });
+});
+
 // --- Background Jobs (simple cron-like scheduling using setInterval) ---
 function scheduleJob(job: () => Promise<void>, cronHour: number) {
   const now = new Date();
@@ -79,21 +96,23 @@ function scheduleJob(job: () => Promise<void>, cronHour: number) {
   }, delay);
 }
 
-// Schedule jobs
-scheduleJob(runRiskDetectionJob, 8);    // Run at 8 AM daily
-scheduleJob(runEveningCheckInJob, 19);  // Run at 7 PM daily
+// Schedule jobs only if not running in Vercel Serverless
+if (!process.env.VERCEL) {
+  scheduleJob(runRiskDetectionJob, 8);    // Run at 8 AM daily
+  scheduleJob(runEveningCheckInJob, 19);  // Run at 7 PM daily
 
-// Run risk detection immediately on startup in development
-if (process.env.NODE_ENV !== 'production') {
-  setTimeout(() => {
-    console.log('[Dev] Running risk detection job on startup...');
-    runRiskDetectionJob();
-  }, 2000);
+  // Run risk detection immediately on startup in development
+  if (process.env.NODE_ENV !== 'production') {
+    setTimeout(() => {
+      console.log('[Dev] Running risk detection job on startup...');
+      runRiskDetectionJob();
+    }, 2000);
+  }
+
+  // --- Start Server ---
+  app.listen(PORT, () => {
+    console.log(`🚀 ExecAI Backend running on http://localhost:${PORT}`);
+  });
 }
-
-// --- Start Server ---
-app.listen(PORT, () => {
-  console.log(`🚀 ExecAI Backend running on http://localhost:${PORT}`);
-});
 
 export default app;
