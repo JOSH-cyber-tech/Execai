@@ -1,5 +1,5 @@
 import { getAuth, clerkClient } from '@clerk/express';
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient } from '../lib/prisma';
 import { Request, Response, NextFunction } from 'express';
 
 const prisma = new PrismaClient();
