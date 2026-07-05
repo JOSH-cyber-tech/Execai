@@ -1,4 +1,9 @@
 {
+  "functions": {
+    "pages/api/**/*": {
+      "includeFiles": "node_modules/.prisma/client/*.node"
+    }
+  },
   "crons": [
     {
       "path": "/api/cron/risk-detection",
