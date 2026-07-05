@@ -1,0 +1,316 @@
+// prisma/schema.prisma
+
+generator client {
+  provider      = "prisma-client-js"
+  output        = "./generated/client"
+  binaryTargets = ["native", "rhel-openssl-3.0.x"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String  @id @default(cuid())
+  clerkId   String  @unique
+  email     String  @unique
+  name      String
+  avatarUrl String?
+
+  // User preferences stored as JSON
+  preferences Json @default("{\"freeTimeStart\": \"19:00\", \"freeTimeEnd\": \"22:00\", \"timezone\": \"Asia/Kolkata\", \"notificationsEnabled\": true}")
+
+  // Google Calendar OAuth tokens (encrypted)
+  googleAccessToken  String?
+  googleRefreshToken String?
+  googleTokenExpiry  DateTime?
+
+  // Web push notification subscription
+  pushSubscription Json?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  tasks            Task[]
+  goals            Goal[]
+  habits           Habit[]
+  scheduleBlocks   ScheduleBlock[]
+  productivityLogs ProductivityLog[]
+  aiInsights       AiInsight[]
+  checkins         Checkin[]
+  notifications    Notification[]
+
+  @@map("users")
+}
+
+model Goal {
+  id     String @id @default(cuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  title       String
+  description String?
+  category    GoalCategory
+  targetDate  DateTime
+  status      GoalStatus   @default(ACTIVE)
+
+  // AI-generated fields
+  aiPlan         Json? // Full AI-generated roadmap
+  estimatedHours Int?
+
+  completionPct Int @default(0) // 0-100
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  tasks      Task[]
+  milestones Milestone[]
+
+  @@map("goals")
+}
+
+model Milestone {
+  id     String @id @default(cuid())
+  goalId String
+  goal   Goal   @relation(fields: [goalId], references: [id], onDelete: Cascade)
+
+  title       String
+  targetDate  DateTime
+  completed   Boolean   @default(false)
+  completedAt DateTime?
+  order       Int
+
+  @@map("milestones")
+}
+
+model Task {
+  id     String  @id @default(cuid())
+  userId String
+  user   User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  goalId String?
+  goal   Goal?   @relation(fields: [goalId], references: [id], onDelete: SetNull)
+
+  title       String
+  description String?
+
+  // AI-extracted metadata
+  aiExtracted      Boolean @default(false)
+  estimatedMinutes Int?
+
+  // Priority system (AI-calculated score 0-100)
+  priorityScore Int      @default(50)
+  priorityLabel Priority @default(MEDIUM)
+
+  // Status
+  status TaskStatus @default(PENDING)
+
+  // Dates
+  deadline     DateTime?
+  scheduledFor DateTime? // Which day this is assigned to
+  completedAt  DateTime?
+
+  // Risk detection
+  riskLevel  RiskLevel @default(NONE)
+  riskReason String?
+
+  // Recurrence
+  isRecurring    Boolean @default(false)
+  recurrenceRule String? // RRULE format
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  subtasks       Subtask[]
+  scheduleBlocks ScheduleBlock[]
+
+  @@map("tasks")
+}
+
+model Subtask {
+  id     String @id @default(cuid())
+  taskId String
+  task   Task   @relation(fields: [taskId], references: [id], onDelete: Cascade)
+
+  title       String
+  completed   Boolean   @default(false)
+  completedAt DateTime?
+  order       Int       @default(0)
+
+  @@map("subtasks")
+}
+
+model ScheduleBlock {
+  id     String  @id @default(cuid())
+  userId String
+  user   User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  taskId String?
+  task   Task?   @relation(fields: [taskId], references: [id], onDelete: SetNull)
+
+  title     String
+  startTime DateTime
+  endTime   DateTime
+
+  // Google Calendar sync
+  calendarEventId  String?
+  syncedToCalendar Boolean @default(false)
+
+  blockType BlockType @default(TASK)
+
+  @@map("schedule_blocks")
+}
+
+model Habit {
+  id     String @id @default(cuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  name        String
+  description String?
+  icon        String  @default("🎯")
+  color       String  @default("#6366f1")
+
+  // Tracking
+  currentStreak    Int @default(0)
+  longestStreak    Int @default(0)
+  totalCompletions Int @default(0)
+
+  // Completion log: { "2024-01-15": true, "2024-01-16": false }
+  completionLog Json @default("{}")
+
+  // AI-detected best time pattern
+  bestTimePattern String? // e.g. "8-10 PM"
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("habits")
+}
+
+model Checkin {
+  id     String @id @default(cuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  date DateTime @default(now())
+
+  // What user reported completing
+  completedTaskIds String[]
+  userMessage      String?
+
+  // AI coach response
+  completionPct   Int
+  coachMessage    String
+  revisedPlan     Json? // Array of tasks for tomorrow
+  motivationScore Int? // 1-10
+
+  @@map("checkins")
+}
+
+model ProductivityLog {
+  id     String @id @default(cuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  date DateTime
+
+  // Metrics for that day
+  tasksCompleted Int   @default(0)
+  tasksPlanned   Int   @default(0)
+  focusMinutes   Int   @default(0)
+  completionRate Float @default(0)
+
+  // Weekly productivity score (0-100)
+  weeklyScore Int?
+
+  @@unique([userId, date])
+  @@map("productivity_logs")
+}
+
+model AiInsight {
+  id     String @id @default(cuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  type  InsightType
+  title String
+  body  String
+
+  // When this insight was generated
+  generatedAt DateTime @default(now())
+
+  // Whether user has seen it
+  seen Boolean @default(false)
+
+  @@map("ai_insights")
+}
+
+model Notification {
+  id     String @id @default(cuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  title   String
+  message String
+  type    String
+  isRead  Boolean @default(false)
+
+  createdAt DateTime @default(now())
+
+  @@map("notifications")
+}
+
+// Enums
+enum GoalCategory {
+  ACADEMIC
+  CAREER
+  HEALTH
+  PERSONAL
+  FINANCIAL
+  LEARNING
+  OTHER
+}
+
+enum GoalStatus {
+  ACTIVE
+  COMPLETED
+  PAUSED
+  ABANDONED
+}
+
+enum Priority {
+  CRITICAL
+  HIGH
+  MEDIUM
+  LOW
+}
+
+enum TaskStatus {
+  PENDING
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+  RESCHEDULED
+}
+
+enum RiskLevel {
+  NONE
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+enum BlockType {
+  TASK
+  BREAK
+  PERSONAL
+  MEETING
+}
+
+enum InsightType {
+  PATTERN
+  RECOMMENDATION
+  WARNING
+  ACHIEVEMENT
+}
