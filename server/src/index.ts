@@ -19,6 +19,7 @@ import { runRiskDetectionJob } from './jobs/riskDetection.job';
 import { runEveningCheckInJob } from './jobs/eveningCheckin.job';
 
 const app = express();
+app.set('trust proxy', 1); // Trust Vercel's proxy
 const PORT = process.env.PORT || 3001;
 
 // --- Middleware ---
@@ -27,7 +28,14 @@ app.use(cors({
   credentials: true
 }));
 app.use(helmet());
-app.use(rateLimit({ windowMs: 15 * 60 * 1000, limit: 300 }));
+app.use(rateLimit({ 
+  windowMs: 15 * 60 * 1000, 
+  limit: 300,
+  keyGenerator: (req) => {
+    return (req.headers['x-forwarded-for'] as string) || req.ip || 'unknown';
+  },
+  validate: false
+}));
 app.use(express.json());
 
 // Health check endpoint
